@@ -5,7 +5,7 @@
     'author': "SimpleIT",
     'website': "http://simpleit.com",
     'category': 'account_invoicing',
-    'depends': ['purchase', 'account'],
+    'depends': ['purchase', 'account', 'hr'],
     'data': [
         'views/model_views.xml',
     ],
