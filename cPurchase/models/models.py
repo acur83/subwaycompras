@@ -84,9 +84,8 @@ class PurchaseOrder(models.Model):
                 self.write({'state': 'Approved'})
                 flag = True
         if not flag:
-            raise exceptions.ValidationError(_('"Error"\
-            You have no access to confirm a Purchase, please contact with\
-            the department manager.'))
+            self.assertTrue(flag, 'You have no access to confirm a\
+                Purchase, please contact with the department manager.')
         else:
             self.build_invoice()
 
@@ -99,7 +98,7 @@ class PurchaseOrder(models.Model):
         AccountInvoice = self.env['account.invoice']
         AccountJournal = self.env['account.journal']
         purchaseJournal = AccountJournal.search([('type','=','purchase')])
-        assert purchaseJournal,'Please create a purchase type journal.'
+        self.assertTrue(purchaseJournal, 'Please create a purchase type journal.')
         p_expense_acc = self.order_line.product_id.property_account_expense_id
         invoice = AccountInvoice.create({
             'partner_id' : self.partner_id.id,
