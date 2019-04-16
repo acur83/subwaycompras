@@ -81,13 +81,14 @@ class PurchaseOrder(models.Model):
         flag = False
         for group in manager_groups:
             if self.env.user.id in group.users.ids:
-                self.write({'state': 'Approved'})
+                self.write({'state' : 'Approved'})
                 flag = True
         if not flag:
             self.assertTrue(flag, 'You have no access to confirm a\
                 Purchase, please contact with the department manager.')
         else:
-            self.build_invoice()
+            return True
+            # self.build_invoice()
 
     @api.model
     def build_invoice(self):
