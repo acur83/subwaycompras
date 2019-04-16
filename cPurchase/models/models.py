@@ -87,8 +87,7 @@ class PurchaseOrder(models.Model):
             self.assertTrue(flag, 'You have no access to confirm a\
                 Purchase, please contact with the department manager.')
         else:
-            return True
-            # self.build_invoice()
+            self.build_invoice()
 
     @api.model
     def build_invoice(self):
@@ -137,17 +136,6 @@ class PurchaseOrder(models.Model):
             ]
         })
         invoice.action_invoice_open()
-        return {
-            'name': 'Test',
-            'type': 'ir.actions.act_window',
-            'view_type': 'form',
-            'view_mode': 'tree,form, search',
-            'res_model': 'account.invoice',
-            'target': 'current',
-            'res_id': invoice.id,
-            'context': { }
-        }
-
 
 
 class HrDeparment(models.Model):
