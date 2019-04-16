@@ -15,6 +15,7 @@ from openerp import models, fields, api
 from openerp.tools.translate import _
 from odoo import exceptions
 from openerp.osv.orm import except_orm
+from odoo.exceptions import UserError
 
 class PurchaseOrder(models.Model):
     """
@@ -49,7 +50,7 @@ class PurchaseOrder(models.Model):
                 _('Please select a Department for the logged user.'))
         return super(PurchaseOrder,self).create(vals)
 
-    @api.model
+    @api.multi
     def action_view_invoice(self):
         '''Is needed redefine for avoid that the user can create a bill
         without a department manager approved.
@@ -61,7 +62,7 @@ class PurchaseOrder(models.Model):
             raise exceptions.ValidationError(_('"Error"\
             Please aprove the purchase first..'))
 
-    @api.model
+    @api.one
     def aprove_purchase(self):
         ''' Confirm the purchase.
         Also check if the logged user have the needed access for confirm a
@@ -84,12 +85,13 @@ class PurchaseOrder(models.Model):
                 self.write({'state' : 'Approved'})
                 flag = True
         if not flag:
-            self.assertTrue(flag, 'You have no access to confirm a\
-                Purchase, please contact with the department manager.')
+            # assert False, 'You have no access to confirm a\
+            #     Purchase, please contact with the department manager.'
+            raise UserError(_('You have no access to confirm a\
+                Purchase, please contact with the department manager.'))
         else:
             self.build_invoice()
 
-    @api.model
     def build_invoice(self):
         ''''This method will build an invoice using the purchase fields and
         related with the PO.
@@ -98,7 +100,8 @@ class PurchaseOrder(models.Model):
         AccountInvoice = self.env['account.invoice']
         AccountJournal = self.env['account.journal']
         purchaseJournal = AccountJournal.search([('type','=','purchase')])
-        self.assertTrue(purchaseJournal, 'Please create a purchase type journal.')
+        if not purchaseJournal:
+            raise UserError(_('Please create a purchase type journal.'))
         p_expense_acc = self.order_line.product_id.property_account_expense_id
         invoice = AccountInvoice.create({
             'partner_id' : self.partner_id.id,
@@ -136,6 +139,17 @@ class PurchaseOrder(models.Model):
             ]
         })
         invoice.action_invoice_open()
+        # return {
+        #     'name': 'Test',
+        #     'type': 'ir.actions.act_window',
+        #     'view_type': 'form',
+        #     'view_mode': 'tree,form, search',
+        #     'res_model': 'account.invoice',
+        #     'target': 'current',
+        #     'res_id': invoice.id,
+        #     'context': { }
+        # }
+
 
 
 class HrDeparment(models.Model):
